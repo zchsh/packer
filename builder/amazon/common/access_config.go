@@ -312,7 +312,7 @@ func (c *AccessConfig) GetCredentials(config *aws.Config) (*awsCredentials.Crede
 
 	sharedCredentialsFilename, err := homedir.Expand(c.CredsFilename)
 	if err != nil {
-		return nil, fmt.Errorf("error expanding shared credentials filename: %w", err)
+		return nil, fmt.Errorf("error expanding shared credentials filename: %v", err)
 	}
 
 	// Create a credentials chain that tries to load credentials from various
@@ -346,14 +346,16 @@ func (c *AccessConfig) GetCredentials(config *aws.Config) (*awsCredentials.Crede
 	// Validate the credentials before returning them
 	creds := awsCredentials.NewChainCredentials(providers)
 	cp, err := creds.Get()
-	if err != nil {
-		if IsAWSErr(err, "NoCredentialProviders", "") {
-			creds, err = c.GetCredentialsFromSession()
-			if err != nil {
-				return nil, err
-			}
+
+	if IsAWSErr(err, "NoCredentialProviders", "") {
+		creds, err = c.GetCredentialsFromSession()
+		if err != nil {
+			return nil, err
 		}
-		return nil, fmt.Errorf("Error loading credentials for AWS Provider: %w", err)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("Error loading credentials for AWS Provider: %v", err)
 	}
 
 	log.Printf("[INFO] AWS Auth provider used: %q", cp.ProviderName)
@@ -371,7 +373,7 @@ func (c *AccessConfig) GetCredentials(config *aws.Config) (*awsCredentials.Crede
 	assumeRoleSession, err := session.NewSession(assumeRoleAWSConfig)
 
 	if err != nil {
-		return nil, fmt.Errorf("error creating assume role session: %w", err)
+		return nil, fmt.Errorf("error creating assume role session: %v", err)
 	}
 
 	stsclient := sts.New(assumeRoleSession)
@@ -441,7 +443,7 @@ func (c *AccessConfig) GetCredentials(config *aws.Config) (*awsCredentials.Crede
 
 // GetCredentialsFromSession returns credentials derived from a session. A
 // session uses the AWS SDK Go chain of providers so may use a provider (e.g.,
-// ProcessProvider) that is not part of the Terraform provider chain.
+// ProcessProvider) that is not part of the Packer provider chain.
 func (c *AccessConfig) GetCredentialsFromSession() (*awsCredentials.Credentials, error) {
 	log.Printf("[INFO] Attempting to use session-derived credentials")
 	// Avoid setting HTTPClient here as it will prevent the ec2metadata
@@ -460,7 +462,7 @@ func (c *AccessConfig) GetCredentialsFromSession() (*awsCredentials.Credentials,
 		if IsAWSErr(err, "NoCredentialProviders", "") {
 			return nil, c.NewNoValidCredentialSourcesError(err)
 		}
-		return nil, fmt.Errorf("Error creating AWS session: %w", err)
+		return nil, fmt.Errorf("Error creating AWS session: %v", err)
 	}
 
 	creds := sess.Config.Credentials
@@ -547,7 +549,7 @@ func (c *AccessConfig) NewNoValidCredentialSourcesError(err error) error {
 	return fmt.Errorf("No valid credential sources found for AWS Builder. "+
 		"Please see https://www.packer.io/docs/builders/amazon#authentication "+
 		"for more information on providing credentials for the AWS Builder. "+
-		"Error: %w", err)
+		"Error: %v", err)
 }
 
 func (c *AccessConfig) NewEC2Connection() (ec2iface.EC2API, error) {
