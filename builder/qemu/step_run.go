@@ -41,7 +41,7 @@ func (s *stepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 	}
 	ui.Say(message)
 
-	command, err := getCommandArgs(bootDrive, state)
+	command, err := s.getCommandArgs(bootDrive, state)
 	if err != nil {
 		err := fmt.Errorf("Error processing QemuArgs: %s", err)
 		ui.Error(err.Error())
@@ -66,7 +66,7 @@ func (s *stepRun) Cleanup(state multistep.StateBag) {
 	}
 }
 
-func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error) {
+func (s *stepRun) getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error) {
 	config := state.Get("config").(*Config)
 	isoPath := state.Get("iso_path").(string)
 	vncIP := config.VNCBindAddress
