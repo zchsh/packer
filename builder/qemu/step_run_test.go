@@ -71,14 +71,8 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				"-display", "gtk",
 				"-boot", "c",
 				"-device", "virtio-scsi-pci,id=scsi0",
-				"-device", "virtio-scsi-pci,id=scsi0",
-				"-device", "virtio-scsi-pci,id=scsi0",
 				"-device", "scsi-hd,bus=scsi0.0,drive=drive0",
-				"-device", "scsi-hd,bus=scsi0.0,drive=drive1",
-				"-device", "scsi-hd,bus=scsi0.0,drive=drive2",
 				"-drive", "if=none,file=/path/to/output,id=drive0,cache=writeback,discard=,format=qcow2,detect-zeroes=",
-				"-drive", "if=none,file=qemupath1,id=drive1,cache=writeback,discard=,format=qcow2,detect-zeroes=",
-				"-drive", "if=none,file=qemupath2,id=drive2,cache=writeback,discard=,format=qcow2,detect-zeroes=",
 				"-drive", "file=fake_cd_path.iso,index=0,media=cdrom",
 			},
 			"virtio-scsi interface. Note this is broken; " +
@@ -101,7 +95,6 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			[]string{
 				"-display", "gtk",
 				"-boot", "once=d",
-				"-device", "virtio-scsi-pci,id=scsi0",
 				"-device", "virtio-scsi-pci,id=scsi0",
 				"-device", "scsi-hd,bus=scsi0.0,drive=drive0",
 				"-device", "scsi-hd,bus=scsi0.0,drive=drive1",
@@ -152,6 +145,29 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
 			},
 			"version less than 2",
+		},
+		{
+			&Config{
+				OutputDir:     "/path/to/output",
+				DiskInterface: "virtio",
+				DiskCache:     "writeback",
+				Format:        "qcow2",
+			},
+			map[string]interface{}{
+				"cd_path":         "fake_cd_path.iso",
+				"qemu_disk_paths": []string{"qemupath1", "qemupath2"},
+			},
+			&stepRun{},
+			[]string{
+				"-display", "gtk",
+				"-boot", "once=d",
+				"-drive", "file=/path/to/output,if=virtio,cache=writeback,format=qcow2",
+				"-drive", "file=qemupath1,if=virtio,cache=writeback,format=qcow2,detect-zeroes=",
+				"-drive", "file=qemupath2,if=virtio,cache=writeback,format=qcow2,detect-zeroes=",
+				"-drive", "file=fake_cd_path.iso,if=virtio,index=1,media=cdrom",
+				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
+			},
+			"virtio interface with extra disks",
 		},
 	}
 	for _, tc := range testcases {
