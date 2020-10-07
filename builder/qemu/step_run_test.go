@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -30,6 +31,96 @@ func runTestState(t *testing.T, config *Config) multistep.StateBag {
 	state.Put("vnc_password", "fake_vnc_password")
 
 	return state
+}
+
+func Test_UserOverrides(t *testing.T) {
+	type testCase struct {
+		Config   *Config
+		Expected []string
+		Reason   string
+	}
+	testcases := []testCase{
+		{
+			&Config{
+				HTTPConfig: common.HTTPConfig{
+					HTTPDir: "http/directory",
+				},
+				OutputDir: "output/directory",
+				VMName:    "myvm",
+				QemuArgs: [][]string{
+					{"-randomflag1", "{{.HTTPIP}}-{{.HTTPPort}}-{{.HTTPDir}}"},
+					{"-randomflag2", "{{.OutputDir}}-{{.Name}}"},
+				},
+			},
+			[]string{
+				"-display", "gtk",
+				"-boot", "once=d",
+				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
+				"-randomflag1", "127.0.0.1-1234-http/directory",
+				"-randomflag2", "output/directory-myvm",
+				"-device", ",netdev=user.0",
+			},
+			"Test that interpolation overrides work.",
+		},
+		{
+			&Config{
+				VMName:   "myvm",
+				QemuArgs: [][]string{{"-display", "partydisplay"}},
+			},
+			[]string{
+				"-display", "partydisplay",
+				"-boot", "once=d",
+				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
+				"-device", ",netdev=user.0",
+			},
+			"User input overrides default, rest is populated as normal",
+		},
+		{
+			&Config{
+				VMName:    "myvm",
+				NetDevice: "mynetdevice",
+				QemuArgs:  [][]string{{"-device", "somerandomdevice"}},
+			},
+			[]string{
+				"-display", "gtk",
+				"-device", "somerandomdevice",
+				"-device", "mynetdevice,netdev=user.0",
+				"-boot", "once=d",
+				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
+			},
+			"Net device gets added",
+		},
+	}
+
+	for _, tc := range testcases {
+		state := runTestState(t, tc.Config)
+
+		// figure out boot config
+		bootval := "c"
+		for i, val := range tc.Expected {
+			if val == "-boot" {
+				bootval = tc.Expected[i+1]
+			}
+		}
+		step := &stepRun{}
+		args, err := step.getCommandArgs(bootval, state)
+		if err != nil {
+			t.Fatalf("should not have an error getting args. Error: %s", err)
+		}
+
+		expected := append([]string{
+			"-m", "0M",
+			"-fda", "fake_floppy_path",
+			"-name", "myvm",
+			"-netdev", "user,id=user.0,hostfwd=tcp::5000-:0",
+			"-vnc", ":5905",
+			"-machine", "type=,accel="},
+			tc.Expected...)
+
+		assert.ElementsMatch(t, args, expected,
+			fmt.Sprintf("%s, \nRecieved: %#v", tc.Reason, args))
+	}
+
 }
 
 func Test_DriveAndDeviceArgs(t *testing.T) {
@@ -223,26 +314,6 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				Format:        "qcow2",
 			},
 			map[string]interface{}{
-				// when disk image is false, we will always have at least one
-				// disk path: the one we create to be the main disk.
-				"qemu_disk_paths": []string{"output/dir/path/mydisk.qcow2"},
-			},
-			&stepRun{},
-			[]string{
-				"-boot", "once=d",
-				"-drive", "file=/path/to/output,if=virtio,cache=writeback,format=qcow2",
-				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
-			},
-			"version less than 2",
-		},
-		{
-			&Config{
-				OutputDir:     "/path/to/output",
-				DiskInterface: "virtio",
-				DiskCache:     "writeback",
-				Format:        "qcow2",
-			},
-			map[string]interface{}{
 				"cd_path":         "fake_cd_path.iso",
 				"qemu_disk_paths": []string{"qemupath1", "qemupath2"},
 			},
@@ -256,6 +327,26 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
 			},
 			"virtio interface with extra disks",
+		},
+		{
+			&Config{
+				DiskImage:     true,
+				OutputDir:     "/path/to/output",
+				DiskInterface: "virtio",
+				DiskCache:     "writeback",
+				Format:        "qcow2",
+			},
+			map[string]interface{}{
+				"cd_path": "fake_cd_path.iso",
+			},
+			&stepRun{},
+			[]string{
+				"-display", "gtk",
+				"-boot", "c",
+				"-drive", "file=/path/to/output,if=virtio,cache=writeback,discard=,format=qcow2,detect-zeroes=",
+				"-drive", "file=fake_cd_path.iso,index=0,media=cdrom",
+			},
+			"virtio interface with disk image",
 		},
 	}
 	for _, tc := range testcases {
@@ -536,7 +627,15 @@ func Test_Defaults(t *testing.T) {
 			state.Put(k, v)
 		}
 
-		args, err := tc.Step.getCommandArgs("once=d", state)
+		// figure out boot config
+		bootval := "c"
+		for i, val := range tc.Expected {
+			if val == "-boot" {
+				bootval = tc.Expected[i+1]
+			}
+		}
+
+		args, err := tc.Step.getCommandArgs(bootval, state)
 		if err != nil {
 			t.Fatalf("should not have an error getting args. Error: %s", err)
 		}
