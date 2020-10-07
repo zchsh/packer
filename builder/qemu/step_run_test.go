@@ -51,7 +51,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				"-boot", "once=d",
 				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
 			},
-			"Boot value should default to once=d with diskImage isnt set",
+			"Boot value should default to once=d when diskImage isn't set",
 		},
 		{
 			&Config{
@@ -64,8 +64,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				DetectZeroes: "off",
 			},
 			map[string]interface{}{
-				"cd_path":         "fake_cd_path.iso",
-				"qemu_disk_paths": []string{"qemupath1", "qemupath2"},
+				"cd_path": "fake_cd_path.iso",
 			},
 			&stepRun{},
 			[]string{
@@ -89,8 +88,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				DetectZeroes: "on",
 			},
 			map[string]interface{}{
-				"cd_path":         "fake_cd_path.iso",
-				"qemu_disk_paths": []string{"qemupath1", "qemupath2"},
+				"cd_path": "fake_cd_path.iso",
 			},
 			&stepRun{},
 			[]string{
@@ -113,7 +111,9 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				DetectZeroes: "off",
 			},
 			map[string]interface{}{
-				"cd_path":         "fake_cd_path.iso",
+				"cd_path": "fake_cd_path.iso",
+				// when disk image is false, we will always have at least one
+				// disk path: the one we create to be the main disk.
 				"qemu_disk_paths": []string{"qemupath1", "qemupath2"},
 			},
 			&stepRun{},
@@ -128,7 +128,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
 				"-drive", "file=fake_cd_path.iso,index=1,media=cdrom",
 			},
-			"virtio-scsi interface, DiskImage false, extra cdrom, detect zeroes off",
+			"virtio-scsi interface, bootable iso, cdrom",
 		},
 		{
 			&Config{
@@ -140,7 +140,9 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				DetectZeroes: "on",
 			},
 			map[string]interface{}{
-				"cd_path":         "fake_cd_path.iso",
+				"cd_path": "fake_cd_path.iso",
+				// when disk image is false, we will always have at least one
+				// disk path: the one we create to be the main disk.
 				"qemu_disk_paths": []string{"qemupath1", "qemupath2"},
 			},
 			&stepRun{},
@@ -165,12 +167,18 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				DiskCache: "writeback",
 				Format:    "qcow2",
 			},
-			map[string]interface{}{},
+			map[string]interface{}{
+				// when disk image is false, we will always have at least one
+				// disk path: the one we create to be the main disk.
+				"qemu_disk_paths": []string{"output/dir/path/mydisk.qcow2"},
+			},
 			&stepRun{},
 			[]string{
 				"-display", "gtk",
 				"-boot", "once=d",
 				"-device", "virtio-scsi-pci,id=scsi0",
+				"-device", "scsi-hd,bus=scsi0.0,drive=drive0",
+				"-drive", "if=none,file=output/dir/path/mydisk.qcow2,id=drive0,cache=writeback,discard=,format=qcow2,detect-zeroes=",
 				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
 			},
 			"virtio-scsi interface, DiskImage false, no extra disks or cds",
@@ -178,12 +186,14 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 		{
 			&Config{},
 			map[string]interface{}{
-				"cd_path": "fake_cd_path.iso",
+				"cd_path":         "fake_cd_path.iso",
+				"qemu_disk_paths": []string{"output/dir/path/mydisk.qcow2"},
 			},
 			&stepRun{},
 			[]string{
 				"-display", "gtk",
 				"-boot", "once=d",
+				"-drive", "file=output/dir/path/mydisk.qcow2,if=,cache=,discard=,format=,detect-zeroes=",
 				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
 				"-drive", "file=fake_cd_path.iso,index=1,media=cdrom",
 			},
@@ -191,11 +201,16 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 		},
 		{
 			&Config{},
-			map[string]interface{}{},
+			map[string]interface{}{
+				// when disk image is false, we will always have at least one
+				// disk path: the one we create to be the main disk.
+				"qemu_disk_paths": []string{"output/dir/path/mydisk.qcow2"},
+			},
 			&stepRun{},
 			[]string{
 				"-display", "gtk",
 				"-boot", "once=d",
+				"-drive", "file=output/dir/path/mydisk.qcow2,if=,cache=,discard=,format=,detect-zeroes=",
 				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
 			},
 			"empty config",
@@ -207,7 +222,11 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				DiskCache:     "writeback",
 				Format:        "qcow2",
 			},
-			map[string]interface{}{},
+			map[string]interface{}{
+				// when disk image is false, we will always have at least one
+				// disk path: the one we create to be the main disk.
+				"qemu_disk_paths": []string{"output/dir/path/mydisk.qcow2"},
+			},
 			&stepRun{},
 			[]string{
 				"-boot", "once=d",
