@@ -58,9 +58,10 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				DiskImage:     true,
 				DiskInterface: "virtio-scsi",
 
-				OutputDir: "/path/to/output",
-				DiskCache: "writeback",
-				Format:    "qcow2",
+				OutputDir:    "/path/to/output",
+				DiskCache:    "writeback",
+				Format:       "qcow2",
+				DetectZeroes: "off",
 			},
 			map[string]interface{}{
 				"cd_path":         "fake_cd_path.iso",
@@ -72,20 +73,44 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				"-boot", "c",
 				"-device", "virtio-scsi-pci,id=scsi0",
 				"-device", "scsi-hd,bus=scsi0.0,drive=drive0",
-				"-drive", "if=none,file=/path/to/output,id=drive0,cache=writeback,discard=,format=qcow2,detect-zeroes=",
+				"-drive", "if=none,file=/path/to/output,id=drive0,cache=writeback,discard=,format=qcow2",
 				"-drive", "file=fake_cd_path.iso,index=0,media=cdrom",
 			},
-			"virtio-scsi interface. Note this is broken; " +
-				"the scsi drive being addd always has the same bus. " +
-				"We need to fix this.",
+			"virtio-scsi interface, DiskImage true, extra cdrom, detectZeroes off",
+		},
+		{
+			&Config{
+				DiskImage:     true,
+				DiskInterface: "virtio-scsi",
+
+				OutputDir:    "/path/to/output",
+				DiskCache:    "writeback",
+				Format:       "qcow2",
+				DetectZeroes: "on",
+			},
+			map[string]interface{}{
+				"cd_path":         "fake_cd_path.iso",
+				"qemu_disk_paths": []string{"qemupath1", "qemupath2"},
+			},
+			&stepRun{},
+			[]string{
+				"-display", "gtk",
+				"-boot", "c",
+				"-device", "virtio-scsi-pci,id=scsi0",
+				"-device", "scsi-hd,bus=scsi0.0,drive=drive0",
+				"-drive", "if=none,file=/path/to/output,id=drive0,cache=writeback,discard=,format=qcow2,detect-zeroes=on",
+				"-drive", "file=fake_cd_path.iso,index=0,media=cdrom",
+			},
+			"virtio-scsi interface, DiskImage true, extra cdrom, detectZeroes on",
 		},
 		{
 			&Config{
 				DiskInterface: "virtio-scsi",
 
-				OutputDir: "/path/to/output",
-				DiskCache: "writeback",
-				Format:    "qcow2",
+				OutputDir:    "/path/to/output",
+				DiskCache:    "writeback",
+				Format:       "qcow2",
+				DetectZeroes: "off",
 			},
 			map[string]interface{}{
 				"cd_path":         "fake_cd_path.iso",
@@ -98,12 +123,57 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				"-device", "virtio-scsi-pci,id=scsi0",
 				"-device", "scsi-hd,bus=scsi0.0,drive=drive0",
 				"-device", "scsi-hd,bus=scsi0.0,drive=drive1",
-				"-drive", "if=none,file=qemupath1,id=drive0,cache=writeback,discard=,format=qcow2,detect-zeroes=",
-				"-drive", "if=none,file=qemupath2,id=drive1,cache=writeback,discard=,format=qcow2,detect-zeroes=",
+				"-drive", "if=none,file=qemupath1,id=drive0,cache=writeback,discard=,format=qcow2",
+				"-drive", "if=none,file=qemupath2,id=drive1,cache=writeback,discard=,format=qcow2",
 				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
 				"-drive", "file=fake_cd_path.iso,index=1,media=cdrom",
 			},
-			"virtio-scsi interface, bootable iso, cdrom",
+			"virtio-scsi interface, DiskImage false, extra cdrom, detect zeroes off",
+		},
+		{
+			&Config{
+				DiskInterface: "virtio-scsi",
+
+				OutputDir:    "/path/to/output",
+				DiskCache:    "writeback",
+				Format:       "qcow2",
+				DetectZeroes: "on",
+			},
+			map[string]interface{}{
+				"cd_path":         "fake_cd_path.iso",
+				"qemu_disk_paths": []string{"qemupath1", "qemupath2"},
+			},
+			&stepRun{},
+			[]string{
+				"-display", "gtk",
+				"-boot", "once=d",
+				"-device", "virtio-scsi-pci,id=scsi0",
+				"-device", "scsi-hd,bus=scsi0.0,drive=drive0",
+				"-device", "scsi-hd,bus=scsi0.0,drive=drive1",
+				"-drive", "if=none,file=qemupath1,id=drive0,cache=writeback,discard=,format=qcow2,detect-zeroes=on",
+				"-drive", "if=none,file=qemupath2,id=drive1,cache=writeback,discard=,format=qcow2,detect-zeroes=on",
+				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
+				"-drive", "file=fake_cd_path.iso,index=1,media=cdrom",
+			},
+			"virtio-scsi interface, DiskImage false, extra cdrom, detect zeroes on",
+		},
+		{
+			&Config{
+				DiskInterface: "virtio-scsi",
+
+				OutputDir: "/path/to/output",
+				DiskCache: "writeback",
+				Format:    "qcow2",
+			},
+			map[string]interface{}{},
+			&stepRun{},
+			[]string{
+				"-display", "gtk",
+				"-boot", "once=d",
+				"-device", "virtio-scsi-pci,id=scsi0",
+				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
+			},
+			"virtio-scsi interface, DiskImage false, no extra disks or cds",
 		},
 		{
 			&Config{},
