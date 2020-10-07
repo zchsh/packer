@@ -161,10 +161,9 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			[]string{
 				"-display", "gtk",
 				"-boot", "once=d",
-				"-drive", "file=/path/to/output,if=virtio,cache=writeback,format=qcow2",
-				"-drive", "file=qemupath1,if=virtio,cache=writeback,format=qcow2,detect-zeroes=",
-				"-drive", "file=qemupath2,if=virtio,cache=writeback,format=qcow2,detect-zeroes=",
-				"-drive", "file=fake_cd_path.iso,if=virtio,index=1,media=cdrom",
+				"-drive", "file=qemupath1,if=virtio,cache=writeback,discard=,format=qcow2,detect-zeroes=",
+				"-drive", "file=qemupath2,if=virtio,cache=writeback,discard=,format=qcow2,detect-zeroes=",
+				"-drive", "file=fake_cd_path.iso,index=1,media=cdrom",
 				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
 			},
 			"virtio interface with extra disks",
