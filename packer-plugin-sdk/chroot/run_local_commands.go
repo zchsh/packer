@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/common"
-	sl "github.com/hashicorp/packer/common/shell-local"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	sl "github.com/hashicorp/packer/packer-plugin-sdk/shell-local"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 

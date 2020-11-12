@@ -8,9 +8,9 @@ import (
 	"os/exec"
 	"syscall"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 )
 
 // StepMountExtra mounts the attached device.

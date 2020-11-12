@@ -13,8 +13,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer/tmp"
 )
 

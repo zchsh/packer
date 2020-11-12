@@ -10,9 +10,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/hashicorp/packer/common/shell"
 	configHelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/shell"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 

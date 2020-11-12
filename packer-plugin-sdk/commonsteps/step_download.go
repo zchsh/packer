@@ -17,9 +17,9 @@ import (
 	getter "github.com/hashicorp/go-getter/v2"
 	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
 
-	"github.com/hashicorp/packer/common/filelock"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/filelock"
 )
 
 // StepDownload downloads a remote file using the download client within

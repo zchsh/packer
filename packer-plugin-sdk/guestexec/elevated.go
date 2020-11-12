@@ -8,8 +8,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
 
 type ElevatedProvisioner interface {
