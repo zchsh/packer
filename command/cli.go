@@ -4,7 +4,6 @@ import (
 	"flag"
 	"strings"
 
-	"github.com/hashicorp/packer/helper/enumflag"
 	kvflag "github.com/hashicorp/packer/helper/flag-kv"
 	sliceflag "github.com/hashicorp/packer/helper/flag-slice"
 )
@@ -79,7 +78,7 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 
 	flags.Int64Var(&ba.ParallelBuilds, "parallel-builds", 0, "")
 
-	flagOnError := enumflag.New(&ba.OnError, "cleanup", "abort", "ask", "run-cleanup-provisioner")
+	flagOnError := NewEnumFlag(&ba.OnError, "cleanup", "abort", "ask", "run-cleanup-provisioner")
 	flags.Var(flagOnError, "on-error", "")
 
 	ba.MetaArgs.AddFlagSets(flags)

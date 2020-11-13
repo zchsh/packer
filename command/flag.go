@@ -1,4 +1,4 @@
-package enumflag
+package command
 
 import "fmt"
 
@@ -8,7 +8,7 @@ type enumFlag struct {
 }
 
 // New returns a flag.Value implementation for parsing flags with a one-of-a-set value
-func New(target *string, options ...string) *enumFlag {
+func NewEnumFlag(target *string, options ...string) *enumFlag {
 	return &enumFlag{target: target, options: options}
 }
 
