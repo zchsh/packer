@@ -1,3 +1,11 @@
+/*
+Package testing provides the tooling for writing acceptance tests of your
+builder. Beware running acceptance tests -- they will use real resources and
+therefore cost real money. To run tests for a builder, call
+
+`PACKER_ACC=1 go test -count $(COUNT) -v $(TEST) $(TESTARGS) -timeout=120m`
+*/
+
 package testing
 
 import (

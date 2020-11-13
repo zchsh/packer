@@ -13,9 +13,9 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/ucloud/ucloud-sdk-go/services/ufile"

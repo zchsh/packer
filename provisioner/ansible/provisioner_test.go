@@ -14,8 +14,8 @@ import (
 	"strings"
 	"testing"
 
-	confighelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	confighelper "github.com/hashicorp/packer/packer-plugin-sdk/config"
 	"github.com/stretchr/testify/assert"
 )
 

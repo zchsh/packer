@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"strings"
 
-	configHelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	configHelper "github.com/hashicorp/packer/packer-plugin-sdk/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/shell"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )

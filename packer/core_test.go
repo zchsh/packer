@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	configHelper "github.com/hashicorp/packer/helper/config"
+	configHelper "github.com/hashicorp/packer/packer-plugin-sdk/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 )
 
