@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "title": "Docker",
+    "path": "docker-remote-plugin",
+    "repo": "hashicorp/packer-plugin-docker"
+  }
+]
