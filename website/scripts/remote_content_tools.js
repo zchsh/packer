@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const dotenv = require('dotenv')
 
-// Read in envs
+// Read in envs (need GITHUB_API_TOKEN from .env.local when running locally)
 dotenv.config()
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') })
 
